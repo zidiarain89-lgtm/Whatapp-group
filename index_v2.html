@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="WhatsGroup پر WhatsApp گروپس تلاش کریں، Join کریں اور اپنے گروپ کو Promote کریں۔">
+<meta name="keywords" content="WhatsApp groups, Pakistan WhatsApp groups, WhatsApp group promotion">
+<meta name="theme-color" content="#128c7e">
+<title>WhatsGroup — WhatsApp Group Promotion</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f4f7f5;color:#17231d}
+header{background:#128c7e;color:#fff;padding:22px 16px;text-align:center}
+header h1{font-size:30px;margin-bottom:7px}
+header p{opacity:.92}
+.container{max-width:1000px;margin:auto;padding:18px}
+.search{display:flex;gap:10px;margin:5px 0 18px}
+.search input{flex:1;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;outline:none}
+.search button,.join,.add-btn{border:0;background:#25d366;color:#063b20;font-weight:bold;padding:13px 18px;border-radius:12px;cursor:pointer}
+.cats{display:flex;gap:8px;overflow:auto;padding-bottom:12px}
+.cat{white-space:nowrap;border:0;background:#fff;padding:10px 15px;border-radius:20px;cursor:pointer;box-shadow:0 1px 5px #0001}
+.cat.active{background:#128c7e;color:#fff}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:15px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+.card{background:#fff;border-radius:16px;padding:17px;box-shadow:0 3px 14px #00000010}
+.card h3{margin-bottom:7px}
+.badge{display:inline-block;background:#e8f8ee;color:#128c7e;padding:5px 9px;border-radius:15px;font-size:12px;margin-bottom:10px}
+.card p{color:#64736b;line-height:1.5;margin-bottom:13px;font-size:14px}
+.card .join{display:block;text-align:center;text-decoration:none}
+.promo{background:linear-gradient(135deg,#075e54,#128c7e);color:white;padding:20px;border-radius:17px;margin:18px 0}
+.promo .add-btn{margin-top:12px}
+form{display:none;background:#fff;padding:18px;border-radius:16px;margin-top:15px;box-shadow:0 3px 14px #0001}
+form input,form select,form textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
+form button{margin-top:7px}
+.empty{text-align:center;padding:30px;color:#718078}
+footer{text-align:center;padding:25px;color:#78857e;font-size:13px}
+@media(max-width:500px){header h1{font-size:25px}.search button{padding:12px}.container{padding:13px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>📱 WhatsGroup</h1>
+  <p>اپنے پسندیدہ WhatsApp گروپس تلاش کریں اور Join کریں</p>
+</header>
+
+<main class="container">
+  <div class="promo">
+    <h2>🔥 اپنا WhatsApp گروپ Promote کریں</h2>
+    <p style="margin-top:7px">اپنے گروپ کو ہماری ویب سائٹ پر شامل کریں اور نئے ممبرز حاصل کریں۔</p>
+    <button class="add-btn" onclick="toggleForm()">+ گروپ Submit کریں</button>
+  </div>
+
+  <form id="addForm" onsubmit="addGroup(event)">
+    <h3>نیا WhatsApp گروپ شامل کریں</h3>
+    <input id="name" placeholder="Group Name" required>
+    <textarea id="desc" placeholder="Group Description" required></textarea>
+    <select id="category">
+      <option>Entertainment</option><option>Education</option><option>Jobs</option>
+      <option>Business</option><option>Technology</option><option>Other</option>
+    </select>
+    <input id="link" type="url" placeholder="https://chat.whatsapp.com/..." required>
+    <button class="add-btn" type="submit">Submit Group</button>
+  </form>
+
+  <div class="search">
+    <input id="search" oninput="render()" placeholder="🔍 گروپ تلاش کریں...">
+    <button onclick="document.getElementById('search').value='';render()">Clear</button>
+  </div>
+
+  <div class="cats">
+    <button class="cat active" onclick="setCat('All',this)">All</button>
+    <button class="cat" onclick="setCat('Entertainment',this)">🎬 Entertainment</button>
+    <button class="cat" onclick="setCat('Education',this)">📚 Education</button>
+    <button class="cat" onclick="setCat('Jobs',this)">💼 Jobs</button>
+    <button class="cat" onclick="setCat('Business',this)">💰 Business</button>
+    <button class="cat" onclick="setCat('Technology',this)">💻 Technology</button>
+  </div>
+
+  <div class="section-title">
+    <h2>🔥 Popular Groups</h2>
+    <span id="count"></span>
+  </div>
+  <div id="groups" class="grid"></div>
+</main>
+
+
+<section class="container" id="adminPanel">
+<div style="background:#fff;padding:18px;border-radius:16px;box-shadow:0 3px 14px #0001">
+<h3>🔐 Admin Panel</h3>
+<p style="font-size:13px;color:#68756f;margin:6px 0">Demo password: <b>123456</b></p>
+<button class="add-btn" onclick="adminLogin()">Admin Login</button>
+<div id="adminArea" style="display:none;margin-top:12px"></div>
+</div>
+</section>
+<script>
+const ADMIN_PASSWORD="123456";
+function adminLogin(){
+ const p=prompt("Admin Password:");
+ if(p!==ADMIN_PASSWORD){if(p!==null)alert("غلط password");return}
+ document.getElementById("adminArea").style.display="block";renderAdmin();
+}
+function renderAdmin(){
+ const area=document.getElementById("adminArea");
+ const pending=groups.filter(g=>g.approved===false);
+ area.innerHTML=pending.length?pending.map(g=>`
+ <div style="padding:10px 0;border-bottom:1px solid #eee">
+ <b>${escapeHtml(g.name)}</b><br>
+ <small>${escapeHtml(g.cat)} — ${escapeHtml(g.desc)}</small><br>
+ <button onclick="approveGroup(${g.id})">Approve</button>
+ <button onclick="deleteGroup(${g.id})" style="background:#ffdede;color:#8b0000">Delete</button>
+ </div>`).join(""):"<p>کوئی pending group نہیں۔</p>";
+}
+function approveGroup(id){
+ const g=groups.find(x=>x.id==id);
+ if(g){g.approved=true;save();render();renderAdmin()}
+}
+function deleteGroup(id){
+ if(confirm("Group delete کرنا ہے؟")){
+   groups=groups.filter(x=>x.id!=id);save();render();renderAdmin();
+ }
+}
+</script>
+<footer>© 2026 WhatsGroup — WhatsApp Group Promotion Website</footer>
+
+<script>
+let category='All';
+try{groups=JSON.parse(localStorage.getItem('whatsgroup_data'))||groups}catch(e){}
+function save(){localStorage.setItem('whatsgroup_data',JSON.stringify(groups))}
+let groups=[
+ {name:'Funny Videos & Memes 😂',cat:'Entertainment',desc:'Funny videos, memes اور روزانہ entertainment.',link:'https://chat.whatsapp.com/EXAMPLE1'},
+ {name:'Online Study Group 📚',cat:'Education',desc:'Students کے لیے study material اور helpful discussion.',link:'https://chat.whatsapp.com/EXAMPLE2'},
+ {name:'Jobs & Careers Pakistan 💼',cat:'Jobs',desc:'Latest jobs اور career opportunities کی معلومات.',link:'https://chat.whatsapp.com/EXAMPLE3'},
+ {name:'Business Ideas 💰',cat:'Business',desc:'Business ideas، freelancing اور online earning discussion.',link:'https://chat.whatsapp.com/EXAMPLE4'},
+ {name:'Technology Updates 💻',cat:'Technology',desc:'AI، technology اور نئی apps کی updates.',link:'https://chat.whatsapp.com/EXAMPLE5'}
+];
+
+function setCat(c,el){
+ category=c;
+ document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+ el.classList.add('active'); render();
+}
+function render(){
+ const q=document.getElementById('search').value.toLowerCase();
+ const list=groups.filter(g=>g.approved!==false&&(category==='All'||g.cat===category)&&(g.name+' '+g.desc).toLowerCase().includes(q));
+ document.getElementById('count').textContent=list.length+' Groups';
+ document.getElementById('groups').innerHTML=list.length?list.map(g=>`
+ <article class="card">
+   <span class="badge">${g.cat}</span>
+   <h3>${escapeHtml(g.name)}</h3>
+   <p>${escapeHtml(g.desc)}</p>
+   <a class="join" href="${g.link}" target="_blank" rel="noopener">💚 Join WhatsApp Group</a>
+ </article>`).join(''):'<div class="empty">کوئی گروپ نہیں ملا۔</div>';
+}
+function toggleForm(){
+ const f=document.getElementById('addForm');
+ f.style.display=f.style.display==='block'?'none':'block';
+}
+function addGroup(e){
+ e.preventDefault();
+ groups.unshift({
+  id:Date.now(),approved:false,
+  name:document.getElementById('name').value,
+  desc:document.getElementById('desc').value,
+  cat:document.getElementById('category').value,
+  link:document.getElementById('link').value
+ });
+ save(); e.target.reset(); toggleForm(); render();
+ alert('Group successfully added!');
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+render();
+</script>
+</body>
+</html>
